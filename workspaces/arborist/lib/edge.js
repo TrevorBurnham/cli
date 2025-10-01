@@ -114,6 +114,14 @@ class Edge {
       return depValid(node, this.rawSpec, this.#accept, this.#from)
     }
 
+    // Special case for peer dependencies: if this is a peer edge and the node
+    // satisfies the rawSpec, then it should be considered valid regardless of
+    // override complications. This fixes the ERESOLVE bug where peer dependencies
+    // are incorrectly rejected when overrides are present.
+    if (this.peer && depValid(node, this.rawSpec, this.#accept, this.#from)) {
+      return true
+    }
+
     // If there's no override we just use the spec.
     if (!this.overrides?.keySpec) {
       return depValid(node, this.spec, this.#accept, this.#from)
